@@ -1,7 +1,6 @@
 import PySimpleGUI as sg 
 from tkinter import font
 import os
-from copy import deepcopy
 
 cwd = os.getcwd().replace('\\','/') + '/'
 title = 'Izzypad 1.0'
