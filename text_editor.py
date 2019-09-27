@@ -20,15 +20,18 @@ menu_layout = [['File',['New','Open','Save','Save As','---','Page Setup','Print'
                ['Help',['View Help','---','About Izzypad 1.0']]]
 
 window_layout = [[sg.Menu(menu_layout,)],
-          [sg.Text(infobar, key='info',font=('Consolas',12), text_color='light gray', size=(100,1))],
-          [sg.Multiline(font=('Consolas', 14), key='BODY', auto_size_text=True, size=(450,20))],
-          [sg.Output(size=(500,1), font=('consolas',12))]]
+          [sg.Text(infobar, key='INFO',font=('Consolas',12), text_color='light gray', size=(100,1))],
+          [sg.Multiline(font=('Consolas', 12), key='BODY', auto_size_text=True, size=(450,20))],
+          [sg.Output(size=(500,12), font=('consolas',12))]]
 
 window = sg.Window(title, layout=window_layout, resizable=True, margins=(0,0), size=(1000,600), return_keyboard_events=True).finalize()
 
 #----------FONT ELEMENTS AND FUNCTION----------#
 font_list = sorted([f for f in font.families() if f[0]!='@'])
 font_sizes = [8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72]
+
+# need to figure out how to adjust the element sizes to make sure font adjustments
+# don't make it look like crap
 
 def change_font(font_name, font_size):
     '''Change the font in the main multiline element'''
@@ -48,7 +51,7 @@ def update_infobar():
     '''Update the filepath_name in the infobar'''
     global infobar
     infobar = filepath_name.replace('/',' > ')    
-    window['info'].update(value=infobar)  
+    window['INFO'].update(value=infobar)  
 
 def save_file_as(window, values):
     '''save file as another file'''
