@@ -20,7 +20,7 @@ menu_layout = [['File',['New','Open','Save','Save As','---','Page Setup','Print'
                ['Help',['View Help','---','About Izzypad 1.0']]]
 
 window_layout = [[sg.Menu(menu_layout,)],
-          [sg.Text(infobar, key='INFO',font=('Consolas',12), text_color='light gray', size=(100,1))],
+          [sg.Text(infobar, key='INFO',font=('Consolas',10), text_color='light gray', size=(100,1))],
           [sg.Multiline(font=('Consolas', 12), key='BODY', auto_size_text=True, size=(450,20))],
           [sg.Output(size=(500,12), font=('consolas',12))]]
 
