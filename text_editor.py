@@ -1,4 +1,5 @@
 import PySimpleGUI as sg 
+from tkinter import font
 import os
 
 cwd = os.getcwd().replace('\\','/') + '/'
@@ -17,12 +18,19 @@ menu_layout = [['File',['New','Open','Save','Save As','---','Page Setup','Print'
                ['Run',['Python Shell','Run Module']],
                ['Help',['View Help','---','About Izzypad 1.0']]]
 
-layout = [[sg.Menu(menu_layout,)],
+window_layout = [[sg.Menu(menu_layout,)],
           [sg.Text(infobar, key='info',font=('Consolas',12), text_color='light gray', size=(100,1))],
           [sg.Multiline(font=('Consolas', 14), key='body', auto_size_text=True, size=(450,20))],
           [sg.Output(size=(500,1), font=('consolas',12))]]
 
-window = sg.Window(title, layout=layout, resizable=True, margins=(0,0), size=(1000,600), return_keyboard_events=True)
+window = sg.Window(title, layout=window_layout, resizable=True, margins=(0,0), size=(1000,600), return_keyboard_events=True).finalize()
+
+# how to make this work??
+font_list = font.families()
+font_sizes = [8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72]
+font_layout = [[sg.Combo([font_list]), sg.Listbox(font_sizes)],
+               [sg.OK(), sg.Cancel()]]
+font_window = sg.Window('Font', layout=font_layout)
 
 def update_infobar():
     '''Update the filepath_name in the infobar'''
@@ -96,3 +104,10 @@ while True:
         run_module()
     if event in themes:
         pass
+ #   if event == 'Font':
+ #       while True:
+ #           event, values = font_window.read()
+ #           if event is None:
+ #               break
+ #           else:
+ #               print(values)
