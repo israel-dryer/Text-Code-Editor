@@ -31,9 +31,8 @@ window = sg.Window(title, layout=window_layout, resizable=True, margins=(0,0), s
 font_list = sorted([f for f in font.families() if f[0]!='@'])
 font_sizes = [8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72]
 
-def change_font():
+def change_font(font_name, font_size):
     '''Change the font in the main multiline element'''
-    global font_name, font_size
     font_layout = [[sg.Combo(font_list, key='FONT_NAME', default_value=font_name), 
                     sg.Combo(font_sizes, key='FONT_SIZE', default_value=font_size)],[sg.OK(), sg.Cancel()]]
     font_window = sg.Window('Font', layout=font_layout, size=(350,80))
@@ -120,5 +119,5 @@ while True:
         pass
     if event == 'Font':
         font_name, font_size = window['BODY'].Font
-        change_font()
+        change_font(font_name, font_size)
 
