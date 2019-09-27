@@ -5,6 +5,7 @@ cwd = os.getcwd().replace('\\','/') + '/'
 title = 'Izzypad 1.0'
 filename = 'untitled.txt'
 filepath_name = cwd + filename
+infobar = filepath_name.replace('/',' > ')
 
 themes = sg.ListOfLookAndFeelValues()
 
@@ -17,10 +18,17 @@ menu_layout = [['File',['New','Open','Save','Save As','---','Page Setup','Print'
                ['Help',['View Help','---','About Izzypad 1.0']]]
 
 layout = [[sg.Menu(menu_layout,)],
-          [sg.Text(filepath_name, key='info',font=('TkDefaultFont',10), text_color='yellow', size=(100,1))],
-          [sg.Multiline(font=('consolas', 14), key='body', auto_size_text=True)],
+          [sg.Text(infobar, key='info',font=('Consolas',12), text_color='light gray', size=(100,1))],
+          [sg.Multiline(font=('Consolas', 14), key='body', auto_size_text=True, size=(450,20))],
           [sg.Output(size=(500,1), font=('consolas',12))]]
-window = sg.Window(title, layout=layout, resizable=True, margins=(0,0), size=(1000,800), return_keyboard_events=True)
+
+window = sg.Window(title, layout=layout, resizable=True, margins=(0,0), size=(1000,600), return_keyboard_events=True)
+
+def update_infobar():
+    '''Update the filepath_name in the infobar'''
+    global infobar
+    infobar = filepath_name.replace('/',' > ')    
+    window['info'].update(value=infobar)  
 
 def save_file_as(window, values):
     '''save file as another file'''
@@ -33,8 +41,7 @@ def save_file_as(window, values):
         with open(filepath_name,'w') as f:
             file_text = values.get('body')
             f.write(file_text)
-    window['info'].update(value=filepath_name)  
-    window.refresh()
+        update_infobar()
 
 def save_file(window, values):
     '''save file if file already exists'''
@@ -43,14 +50,13 @@ def save_file(window, values):
     else:
         with open(filepath_name,'w') as f:
             f.write(values.get('body'))
-    window['info'].update(value=filepath_name)   
+    update_infobar()
 
 def new_file(window):
     global filename, filepath_name
     filename = 'untitled.txt'
     filepath_name = cwd + filename
-    window['info'].update(value=filepath_name)
-    window['body'].update(value='')     
+    update_infobar()
 
 def open_file(window):
     '''open a new file'''
@@ -63,17 +69,16 @@ def open_file(window):
         with open(filepath_name,'r') as f:
             file_text = f.read()
         window['body'].update(value=file_text)
-        window['info'].update(value=filepath_name)
+        update_infobar()
 
 def run_module():
     '''the open script'''
-    print('\nEXECUTING Python Session:\n')
+    print(f'Running Session >> {filename}')
+    print('-'*80)
     try:
         exec(open(filepath_name).read())
-        print('\n')
     except:
         exec(values.get('body'))
-
 
 while True:
     event, values = window.read()
@@ -90,4 +95,4 @@ while True:
     if event in['Run Module','F5:116']:
         run_module()
     if event in themes:
-        sg.ChangeLookAndFeel(event)
+        pass
