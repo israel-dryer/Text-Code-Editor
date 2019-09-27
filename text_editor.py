@@ -28,25 +28,22 @@ window_layout = [[sg.Menu(menu_layout,)],
 window = sg.Window(title, layout=window_layout, resizable=True, margins=(0,0), size=(1000,600), return_keyboard_events=True).finalize()
 
 #----------FONT ELEMENTS AND FUNCTION----------#
-body_font_name = 'Consolas'
-body_font_size = 12
 font_list = sorted([f for f in font.families() if f[0]!='@'])
 font_sizes = [8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72]
-font_layout = [[sg.Combo(font_list, key='FONT_NAME', default_value=body_font_name), 
-                sg.Combo(font_sizes, key='FONT_SIZE', default_value=body_font_size)],[sg.OK(), sg.Cancel()]]
 
 def change_font():
     '''Change the font in the main multiline element'''
-    global body_font_name, body_font_size
-    temp_layout = deepcopy(font_layout)
-    font_window = sg.Window('Font', layout=temp_layout, size=(350,80))
+    global font_name, font_size
+    font_layout = [[sg.Combo(font_list, key='FONT_NAME', default_value=font_name), 
+                    sg.Combo(font_sizes, key='FONT_SIZE', default_value=font_size)],[sg.OK(), sg.Cancel()]]
+    font_window = sg.Window('Font', layout=font_layout, size=(350,80))
     font_event, font_values = font_window.read()
     if font_event is None or font_event == 'Exit':
         font_window.close()
     else:
-        body_font_name = font_values.get('FONT_NAME')
-        body_font_size = font_values.get('FONT_SIZE')
-        window['BODY'].update(font=(body_font_name, body_font_size))
+        font_name = font_values.get('FONT_NAME')
+        font_size = font_values.get('FONT_SIZE')
+        window['BODY'].update(font=(font_name, font_size))
         font_window.close()
 
 def update_infobar():
@@ -122,5 +119,6 @@ while True:
     if event in themes:
         pass
     if event == 'Font':
+        font_name, font_size = window['BODY'].Font
         change_font()
 
