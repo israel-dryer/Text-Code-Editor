@@ -1,5 +1,6 @@
 import PySimpleGUI as sg 
 from tkinter import font
+from datetime import datetime
 import os
 
 sg.ChangeLookAndFeel('Dark')
@@ -8,13 +9,12 @@ filename = None
 
 menu_layout = [['File',['New','Open','Save','Save As','---','Page Setup','Print','---','Exit']],
                ['Edit',['Undo','---','Cut','Copy','Paste','Delete','---','Find...','Find Next','Replace...','Go To','---','Select All','Time/Date']],
-               ['Format',['Word Wrap','Font','Theme',themes]],
-               ['View',['Status Bar']],
+               ['Format',['Font','Theme',themes]],
                ['Run',['Python Shell','Run Module']],
                ['Help',['View Help','---','About Izzypad 1.0']]]
 
 window_layout = [[sg.Menu(menu_layout,)],
-          [sg.Text('/New File/', key='_INFO_',font=('Consolas',10), text_color='light gray', size=(100,1))],
+          [sg.Text('> New File <', key='_INFO_',font=('Consolas',11), text_color='light gray', size=(100,1))],
           [sg.Multiline(font=('Consolas', 12), key='_BODY_', auto_size_text=True, size=(450,20))],
           [sg.Output(size=(500,12), font=('consolas',12))]]
 
@@ -49,7 +49,7 @@ def save_file(filename):
     else:
         with open(filename,'w') as f:
             f.write(values.get('_BODY_'))
-        window['_INFO_'].update(value=filename)
+        window['_INFO_'].update(value=filename.replace('/',' > '))
 
 def save_file_as():
     ''' save new file or save existing file with another name '''
@@ -59,12 +59,12 @@ def save_file_as():
     else:
         with open(filename,'w') as f:
             f.write(values.get('_BODY_'))
-        window['_INFO_'].update(value=filename)
+        window['_INFO_'].update(value=filename.replace('/',' > '))
 
 def new_file():
     ''' return info bar to default settings '''
-    filename = '/New File/'
-    window['_INFO_'].update(value=filename)
+    window['_BODY_'].update(value='')
+    window['_INFO_'].update(value='> New File <')
 
 def open_file():
     '''open a new file'''
@@ -75,7 +75,7 @@ def open_file():
         with open(filename,'r') as f:
             file_text = f.read()
         window['_BODY_'].update(value=file_text)
-        window['_INFO_'].update(value=filename)
+        window['_INFO_'].update(value=filename.replace('/',' > '))
 
 def run_module(filename):
     '''the open script'''
@@ -85,6 +85,12 @@ def run_module(filename):
         exec(open(filename).read())
     except:
         exec(values.get('_BODY_'))
+
+def timestamp():
+    ''' add the timestamp to the end of the body text '''
+    timestamp = datetime.now().strftime("%T %D")
+    new_body = values.get('_BODY_') + timestamp
+    window['_BODY_'].update(value=new_body)    
 
 while True:
     event, values = window.read()
@@ -106,3 +112,5 @@ while True:
         pass
     if event == 'Font':
         change_font()
+    if event == 'Time/Date':
+        timestamp()
