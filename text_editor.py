@@ -24,7 +24,7 @@ window = sg.Window('Text//Code Editor', window_layout, resizable=True, margins=(
 
 def save_file(filename):
     ''' save file instantly if already open; otherwise use `save-as` popup '''
-    if filename not in [None,'']:
+    if filename not in (None,''):
         with open(filename,'w') as f:
             f.write(values['_BODY_'])
         window['_INFO_'].update(value=filename.replace('/',' > '))
@@ -34,7 +34,7 @@ def save_file(filename):
 def save_file_as():
     ''' save new file or save existing file with another name '''
     filename = sg.popup_get_file('Save File', save_as=True, no_window=True)
-    if filename not in [None,'']:
+    if filename not in (None,''):
         with open(filename,'w') as f:
             f.write(values['_BODY_'])
         window['_INFO_'].update(value=filename.replace('/',' > '))
@@ -47,7 +47,7 @@ def new_file():
 def open_file():
     '''open a new file'''
     filename = sg.popup_get_file('File Name:', title='Open', no_window=True)
-    if filename not in [None,'']:
+    if filename not in (None,''):
         with open(filename,'r') as f:
             file_text = f.read()
         window['_BODY_'].update(value=file_text)
@@ -73,7 +73,7 @@ def change_font():
                     sg.Combo(font_sizes, key='_SIZE_', default_value=font_size)],[sg.OK(), sg.Cancel()]]
     font_window = sg.Window('Font', font_layout, size=(350,80))
     font_event, font_values = font_window.read()
-    if font_event not in [None,'Exit']:
+    if font_event not in (None,'Exit'):
         font_name, font_size = (font_values['_FONT_'], font_values['_SIZE_'])
         window['_BODY_'].update(font=(font_name, font_size))
     font_window.close()
@@ -93,17 +93,17 @@ def run_module(filename):
 
 while True:
     event, values = window.read()
-    if event in [None,'Exit']:
+    if event in (None,'Exit'):
         break
     if event == 'Open':
         open_file()
-    if event in(['Save']):
+    if event in('Save'):
         save_file(filename)
     if event == 'Save As':
         save_file_as()
     if event == 'New':
         new_file()        
-    if event in['Run Module','F5:116']:
+    if event in ('Run Module','F5:116'):
         run_module(filename)
     if event in themes:
         sg.change_look_and_feel(event)
