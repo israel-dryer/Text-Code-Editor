@@ -87,11 +87,8 @@ def run_module(filename):
     try:
         exec(open(filename).read())
     except:
-        try:
-            exec(values['_BODY_'])
-        except:
-            print('ERROR!! Invalid Python code.')
-
+        exec(values['_BODY_']) # need to fix for invalid python code
+ 
 #---------MAIN EVENT LOOP----------#
 
 while True:
