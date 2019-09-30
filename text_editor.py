@@ -26,7 +26,7 @@ def save_file(filename):
     ''' save file instantly if already open; otherwise use `save-as` popup '''
     if filename not in [None,'']:
         with open(filename,'w') as f:
-            f.write(values.get('_BODY_'))
+            f.write(values['_BODY_'])
         window['_INFO_'].update(value=filename.replace('/',' > '))
     else:
         save_file_as()
@@ -36,7 +36,7 @@ def save_file_as():
     filename = sg.popup_get_file('Save File', save_as=True, no_window=True)
     if filename not in [None,'']:
         with open(filename,'w') as f:
-            f.write(values.get('_BODY_'))
+            f.write(values['_BODY_'])
         window['_INFO_'].update(value=filename.replace('/',' > '))
 
 def new_file():
@@ -58,7 +58,7 @@ def open_file():
 def timestamp():
     ''' add the timestamp to the end of the body text '''
     timestamp = datetime.now().strftime("%T %D")
-    new_body = values.get('_BODY_') + timestamp
+    new_body = values['_BODY_'] + timestamp
     window['_BODY_'].update(value=new_body)    
 
 font_list = sorted([f for f in font.families() if f[0]!='@'])
@@ -74,7 +74,7 @@ def change_font():
     font_window = sg.Window('Font', font_layout, size=(350,80))
     font_event, font_values = font_window.read()
     if font_event not in [None,'Exit']:
-        font_name, font_size = (font_values.get('_FONT_'), font_values.get('_SIZE_'))
+        font_name, font_size = (font_values['_FONT_'], font_values['_SIZE_'])
         window['_BODY_'].update(font=(font_name, font_size))
     font_window.close()
 
@@ -88,7 +88,7 @@ def run_module(filename):
         exec(open(filename).read())
     except:
         try:
-            exec(values.get('_BODY_'))
+            exec(values['_BODY_'])
         except:
             print('ERROR!! Invalid Python code.')
 
