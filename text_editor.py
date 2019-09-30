@@ -13,12 +13,12 @@ menu_layout = [['File',['New','Open','Save','Save As','---','Exit']],
                ['Run',['Python Shell','Run Module']],
                ['Help',['View Help','---','About Izzypad 1.0']]]
 
-window_layout = [[sg.Menu(menu_layout,)],
-          [sg.Text('> New File <', key='_INFO_',font=('Consolas',11), text_color='light gray', size=(100,1))],
-          [sg.Multiline(font=('Consolas', 12), key='_BODY_', auto_size_text=True, size=(450,20))],
-          [sg.Output(size=(500,12), font=('consolas',12))]]
+window_layout = [[sg.Menu(menu_layout)],
+          [sg.Text('> New File <', key='_INFO_',font=('Consolas',11), text_color='light gray', size=(150,1))],
+          [sg.Multiline(font=('Consolas', 12), key='_BODY_', auto_size_text=True, size=(150,20))],
+          [sg.Output(size=(150,12), font=('consolas',12))]]
 
-window = sg.Window('Text//Code Editor', window_layout, resizable=True, margins=(0,0), size=(1000,600), return_keyboard_events=True).finalize()
+window = sg.Window('Text//Code Editor', window_layout, resizable=True, margins=(0,0), return_keyboard_events=True).finalize()
 
 #----------FILE OPEN & SAVE FUNCTIONS----------#
 
@@ -97,7 +97,7 @@ while True:
         break
     if event == 'Open':
         open_file()
-    if event in('Save'):
+    if event in('Save',):
         save_file(filename)
     if event == 'Save As':
         save_file_as()
