@@ -1,26 +1,29 @@
 import PySimpleGUI as sg 
 from tkinter import font
 from datetime import datetime
+import shelve
 import os
 
-sg.ChangeLookAndFeel('Dark')
-themes = sg.ListOfLookAndFeelValues()
-filename = None
+sg.change_look_and_feel('Black')
+
+# instantiate shelve
+app = shelve.open('settings')
+app['filename'] = None
 
 menu_layout = [['File',['New','Open','Save','Save As','---','Exit']],
                ['Edit',['Undo','---','Cut','Copy','Paste','Delete','---','Find...','Find Next','Replace...','Go To','---','Select All','Time/Date']],
-               ['Format',['Font','Theme',themes]],
+               ['Format',['Font','Theme', app['themes']]],
                ['Run',['Python Shell','Run Module']],
                ['Help',['View Help','---','About Izzypad 1.0']]]
 
-col1 = sg.Column([[sg.Multiline(font=('Consolas', 12), key='_BODY_', auto_size_text=True, size=(150,30))]])
-col2 = sg.Column([[sg.Output(size=(150,10), font=('consolas',12))]])               
+col1 = sg.Column([[sg.Multiline(font=app['font'], key='_BODY_', auto_size_text=True, size=(150,30))]])
+col2 = sg.Column([[sg.Output(size=(150,10), font=('Consolas', 12))]])               
 
 window_layout = [[sg.Menu(menu_layout)],
-          [sg.Text('> New File <', key='_INFO_',font=('Consolas',11), text_color='light gray', size=(100,1))],
+          [sg.Text('> New File <', key='_INFO_',font=('Consolas',11), size=(100,1))],
           [sg.Pane([col1, col2])]]
 
-window = sg.Window('TextCode Editor', window_layout, resizable=True, margins=(0,0), return_keyboard_events=True, finalize=True)
+window = sg.Window('TextCode Editor', window_layout, resizable=True, margins=(0,0), size=(1200,800), return_keyboard_events=True, finalize=True)
 
 #----------FILE OPEN & SAVE FUNCTIONS----------#
 
@@ -35,11 +38,11 @@ def save_file(filename):
 
 def save_file_as():
     ''' save new file or save existing file with another name '''
-    filename = sg.popup_get_file('Save File', save_as=True, no_window=True)
-    if filename not in (None,''):
-        with open(filename,'w') as f:
+    app['filename'] = sg.popup_get_file('Save File', save_as=True, no_window=True)
+    if app['filename'] not in (None,''):
+        with open(app['filename'],'w') as f:
             f.write(values['_BODY_'])
-        window['_INFO_'](value=filename.replace('/',' > '))
+        window['_INFO_'](value=app['filename'].replace('/',' > '))
 
 def new_file():
     ''' return info bar to default settings '''
@@ -48,12 +51,12 @@ def new_file():
 
 def open_file():
     '''open a new file'''
-    filename = sg.popup_get_file('File Name:', title='Open', no_window=True)
-    if filename not in (None,''):
-        with open(filename,'r') as f:
+    app['filename'] = sg.popup_get_file('File Name:', title='Open', no_window=True)
+    if app['filename'] not in (None,''):
+        with open(app['filename'],'r') as f:
             file_text = f.read()
         window['_BODY_'](value=file_text)
-        window['_INFO_'](value=filename.replace('/',' > '))
+        window['_INFO_'](value=app['filename'].replace('/',' > '))
 
 #----------FORMAT FUNCTIONS----------#
 
@@ -65,19 +68,19 @@ def timestamp():
 
 font_list = sorted([f for f in font.families() if f[0]!='@'])
 font_sizes = [8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72]
-font_name = 'Consolas'
-font_size = 12
 
 def change_font():
     '''Change the font in the main multiline element'''
     global font_name, font_size
-    font_layout = [[sg.Combo(font_list, key='_FONT_', default_value=font_name), 
-                    sg.Combo(font_sizes, key='_SIZE_', default_value=font_size)],[sg.OK(), sg.Cancel()]]
+    font_layout = [[sg.Combo(font_list, key='_FONT_', default_value=app['font'][0]), 
+                    sg.Combo(font_sizes, key='_SIZE_', default_value=app['font'][1])],[sg.OK(), sg.Cancel()]]
     font_window = sg.Window('Font', font_layout, size=(350,80), keep_on_top=True)
     font_event, font_values = font_window.read()
     if font_event not in (None,'Exit'):
         font_name, font_size = (font_values['_FONT_'], font_values['_SIZE_'])
-        window['_BODY_'](font=(font_name, font_size))
+        app['font'] = (font_name, font_size)
+        window['_BODY_'](font=app['font'])
+        window.refresh()
     font_window.close()
 
 #------------RUN FUNCTIONS-----------#    
@@ -85,29 +88,32 @@ def change_font():
 def run_module(filename):
     '''the open script'''
     print(f'Running Session >> {filename}')
-    print('-'*80)
+    print('-'*30)
     try:
         exec(open(filename).read())
     except:
         exec(values['_BODY_']) # need to fix for invalid python code
  
-#---------MAIN EVENT LOOP----------#
+#---------MAIN WINDOW LOOP----------#
+def main_window():
+    pass
 
 while True:
     event, values = window.read()
     if event in (None,'Exit'):
+        app.close()
         break
     if event == 'Open':
         open_file()
     if event in('Save',):
-        save_file(filename)
+        save_file(app['filename'])
     if event == 'Save As':
         save_file_as()
     if event == 'New':
         new_file()        
     if event in ('Run Module','F5:116'):
-        run_module(filename)
-    if event in themes:
+        run_module(app['filename'])
+    if event in app['themes']:
         sg.change_look_and_feel(event)
     if event == 'Font':
         change_font()
