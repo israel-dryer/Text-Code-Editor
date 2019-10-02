@@ -13,10 +13,12 @@ menu_layout = [['File',['New','Open','Save','Save As','---','Exit']],
                ['Run',['Python Shell','Run Module']],
                ['Help',['View Help','---','About Izzypad 1.0']]]
 
+col1 = sg.Column([[sg.Multiline(font=('Consolas', 12), key='_BODY_', auto_size_text=True, size=(150,30))]])
+col2 = sg.Column([[sg.Output(size=(150,10), font=('consolas',12))]])               
+
 window_layout = [[sg.Menu(menu_layout)],
-          [sg.Text('> New File <', key='_INFO_',font=('Consolas',11), text_color='light gray', size=(150,1))],
-          [sg.Multiline(font=('Consolas', 12), key='_BODY_', auto_size_text=True, size=(150,20))],
-          [sg.Output(size=(150,12), font=('consolas',12))]]
+          [sg.Text('> New File <', key='_INFO_',font=('Consolas',11), text_color='light gray', size=(100,1))],
+          [sg.Pane([col1, col2])]]
 
 window = sg.Window('TextCode Editor', window_layout, resizable=True, margins=(0,0), return_keyboard_events=True, finalize=True)
 
@@ -27,7 +29,7 @@ def save_file(filename):
     if filename not in (None,''):
         with open(filename,'w') as f:
             f.write(values['_BODY_'])
-        window['_INFO_'].update(value=filename.replace('/',' > '))
+        window['_INFO_'](value=filename.replace('/',' > '))
     else:
         save_file_as()
 
@@ -37,12 +39,12 @@ def save_file_as():
     if filename not in (None,''):
         with open(filename,'w') as f:
             f.write(values['_BODY_'])
-        window['_INFO_'].update(value=filename.replace('/',' > '))
+        window['_INFO_'](value=filename.replace('/',' > '))
 
 def new_file():
     ''' return info bar to default settings '''
-    window['_BODY_'].update(value='')
-    window['_INFO_'].update(value='> New File <')
+    window['_BODY_'](value='')
+    window['_INFO_'](value='> New File <')
 
 def open_file():
     '''open a new file'''
@@ -50,8 +52,8 @@ def open_file():
     if filename not in (None,''):
         with open(filename,'r') as f:
             file_text = f.read()
-        window['_BODY_'].update(value=file_text)
-        window['_INFO_'].update(value=filename.replace('/',' > '))
+        window['_BODY_'](value=file_text)
+        window['_INFO_'](value=filename.replace('/',' > '))
 
 #----------FORMAT FUNCTIONS----------#
 
@@ -59,7 +61,7 @@ def timestamp():
     ''' add the timestamp to the end of the body text '''
     timestamp = datetime.now().strftime("%T %D")
     new_body = values['_BODY_'] + timestamp
-    window['_BODY_'].update(value=new_body)    
+    window['_BODY_'](value=new_body)    
 
 font_list = sorted([f for f in font.families() if f[0]!='@'])
 font_sizes = [8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72]
@@ -71,11 +73,11 @@ def change_font():
     global font_name, font_size
     font_layout = [[sg.Combo(font_list, key='_FONT_', default_value=font_name), 
                     sg.Combo(font_sizes, key='_SIZE_', default_value=font_size)],[sg.OK(), sg.Cancel()]]
-    font_window = sg.Window('Font', font_layout, size=(350,80))
+    font_window = sg.Window('Font', font_layout, size=(350,80), keep_on_top=True)
     font_event, font_values = font_window.read()
     if font_event not in (None,'Exit'):
         font_name, font_size = (font_values['_FONT_'], font_values['_SIZE_'])
-        window['_BODY_'].update(font=(font_name, font_size))
+        window['_BODY_'](font=(font_name, font_size))
     font_window.close()
 
 #------------RUN FUNCTIONS-----------#    
