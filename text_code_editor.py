@@ -5,8 +5,13 @@ import shelve
 
 ##-----SETUP DEFAULT USER SETTINGS-----------------------##
 
+save_user_settings = False
 application_active = False
-settings = shelve.open('app_settings')
+
+if save_user_settings:
+    settings = shelve.open('app_settings')
+else:
+    settings = {}
 
 # test for existing shelf and create if not exist
 if len(settings.keys())==0:
@@ -24,7 +29,8 @@ sg.change_look_and_feel(settings['theme'])
 
 def close_settings():
     settings.update(filename=None, body='', info='> New File <')
-    settings.close()
+    if save_user_settings:
+        settings.close()
 
 ##----SETUP GUI WINDOW-----------------------------------##
 def main_window(settings):
