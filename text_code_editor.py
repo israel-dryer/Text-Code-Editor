@@ -1,24 +1,39 @@
+#################################################################
+#
+#  CODE-TEXT EDITOR
+#
+#  What?  A simple code and text editor made with PySimpleGUI
+#  Who?   israel.dryer@gmail.com
+#  When?  10/4/2019 (last modified)
+#  Also?  this is very much a work-in-process!!
+#
+#################################################################
+
 import PySimpleGUI as sg 
 from tkinter import font as tkfont
 from datetime import datetime
 
+# `application_active` flag used when updating the window after the first read, and after a theme change
+# this is currently used as a work-around for the `finalize=True` bug, and can be
+# removed when that issue is fixed
+application_active = False 
+
 ##-----SETUP DEFAULT USER SETTINGS-----------------------##
-
 save_user_settings = False
-application_active = False
-
+# if flag is `False` the settings are saved in active session only with a `dict`
+# if flag is `True` the settings are saved in a local directory in a shelve file
 if save_user_settings:
     import shelve
     settings = shelve.open('app_settings')
 else:
     settings = {}
 
-# test for existing shelf and create if not exist
-if len(settings.keys())==0:
+# check to see if settings dict/shelf contains default values, create if not
+if len(settings.keys()) == 0:
     settings['theme'] = 'BluePurple'
     settings['themes'] = sg.list_of_look_and_feel_values()
-    settings['font']=('TkDefaultFont', 12)
-    settings['tabsize']=4
+    settings['font'] = ('Consolas', 12)
+    settings['tabsize'] = 4
     settings['filename'] = None
     settings['body'] = ''
     settings['info'] = '> New File <'
@@ -28,12 +43,14 @@ if len(settings.keys())==0:
 sg.change_look_and_feel(settings['theme'])
 
 def close_settings():
+    ''' Close the the shelve file upon exit '''
     settings.update(filename=None, body='', info='> New File <')
     if save_user_settings:
         settings.close()
 
 ##----SETUP GUI WINDOW-----------------------------------##
 def main_window(settings):
+    ''' Create the main window; also called when the application theme is changed '''
     elem_width= 80 # adjust default width
     menu_layout = [
         ['File',['New','Open','Save','Save As','---','Exit']],
@@ -56,11 +73,13 @@ def main_window(settings):
 ##----FILE MENU FUNCTIONS--------------------------------##
 
 def new_file(window): # CTRL+N shortcut key
+    ''' Setup a new session by clearing application variables and the body '''
     window['_BODY_'].update(value='')
     window['_INFO_'].update(value='> New File <')
     settings.update(filename=None, body='', info='> New File <')
 
 def open_file(window): # CTRL+O shortcut key
+    ''' Open a local file in the editor '''
     try: # 'OUT OF INDEX' error in trinket if 'CANCEL' button is pressed
         filename = sg.popup_get_file('File Name:', title='Open', no_window=True)
     except:
@@ -73,6 +92,7 @@ def open_file(window): # CTRL+O shortcut key
         settings.update(filename=filename, body=file_text, info=filename.replace('/',' > '))
 
 def save_file(window, values): # CTRL+S shortcut key
+    ''' Save active file. If new, then calls the `save_file_as` function '''
     filename = settings.get('filename')
     if filename not in (None,''):
         with open(filename,'w') as f:
@@ -83,6 +103,7 @@ def save_file(window, values): # CTRL+S shortcut key
         save_file_as(window, values)
 
 def save_file_as(window, values):
+    ''' Save the active file as another file, also called for new files '''
     try: # 'OUT OF INDEX' error in Trinket if 'CANCEL' button is clicked
         filename = sg.popup_get_file('Save File', save_as=True, no_window=True)
     except:
@@ -120,7 +141,7 @@ def select_all():
     pass
 
 def fetch_datetime(window, values):
-    ''' append the current date and time into the body '''
+    ''' Append the current date and time into the body '''
     datetime_stamp = datetime.now().strftime("%T %D")
     new_body = values['_BODY_'] + datetime_stamp
     window['_BODY_'].update(value=new_body)    
@@ -129,23 +150,29 @@ def fetch_datetime(window, values):
 ##----FORMAT MENU FUNCTIONS------------------------------##
 
 def change_theme(window, event, values):
+    ''' Change the color theme of the application window. This will destroy the active window and 
+        recreate it with the same values. The output element is reset at this time. I'll fix this
+        in the future '''
     settings.update(theme=event, body=values['_BODY_'])
     sg.change_look_and_feel(event)
     window.close()
 
 def change_font(window):
-    ''' change default font on body element and save app settings '''
+    ''' Change default font on body element and save as user settings '''
     # get the default font from user settings
     font_name, font_size = settings.get('font')
-    # get available fonts from active window session for combo box
+    # get available fonts from local environment to use in combo box
     font_list = sorted([f for f in tkfont.families() if f[0]!='@'])
+    # check if default font is in font_list, if not return set first font in the list as default
+    if not font_name in font_list:
+      font_name = font_list[0]
     # available sizes to use for combo box (restricted to practical sizes)
     font_sizes = [8,9,10,11,12,14]
     # setup the font gui window
     font_layout = [
         [sg.Combo(font_list, key='_FONT_', default_value=font_name), 
          sg.Combo(font_sizes, key='_SIZE_', default_value=font_size)],[sg.OK(), sg.Cancel()]]
-    font_window = sg.Window('Font', font_layout, size=(350,80), keep_on_top=True)
+    font_window = sg.Window('Font', font_layout, keep_on_top=True)
     # listen for font selection events
     font_event, font_values = font_window.read()
     if font_event not in (None,'Exit'):
@@ -158,7 +185,7 @@ def change_font(window):
     font_window.close()
 
 def change_tabsize(window):
-    ''' user interface for the set_tabsize function '''
+    ''' Change the tab size in the body. This is the user interface for the set_tabsize function '''
     tab_layout = [[sg.Slider(range=(1,8), default_value=settings['tabsize'], orientation='horizontal', key='_SIZE_'), sg.OK(size=(5,2))]]
     tab_window = sg.Window('Tab Size', tab_layout, keep_on_top=True)
     tab_event, tab_values = tab_window.read()
@@ -170,17 +197,17 @@ def change_tabsize(window):
             settings.update(tabsize=new_tab_size)
             set_tabsize(window, new_tab_size)
             print(f"Tab size....... {old_tab_size} => {new_tab_size}\n")
-
     tab_window.close()
 
 def set_tabsize(window, size=4): # load upon opening after 'finalize=True' is fixed
-    ''' adjust the tab size in the body; default is 4 '''
+    ''' Adjust the tab size in the body; default is 4 '''
     font = tkfont.Font(font=settings.get('font'))
     tab_width = font.measure(' '*size)
     window['_BODY_'].Widget.configure(tabs=(tab_width,)) 
     settings.update(tabsize=size) 
 
 def show_settings():
+    ''' Print the saved user settings to the Output element '''
     print(f"Theme.......... {settings['theme']}")
     print(f"Tab size....... {settings['tabsize']}")
     print( "Font.............. {}, {}".format(*settings['font']))
@@ -189,6 +216,7 @@ def show_settings():
 ##----RUN MENU FUNCTIONS---------------------------------##
 
 def run_module(values): # F5 shortcut key
+    ''' Run any python code that is in the body '''
     print('.'*50)
     print(f"Running session :: {settings['info']}\n")
     try:
