@@ -4,21 +4,42 @@
 #
 #  What?  A simple code and text editor made with PySimpleGUI
 #  Who?   israel.dryer@gmail.com
-#  When?  10/4/2019 (last modified)
+#  When?  10/5/2019 (last modified)
 #  Also?  this is very much a work-in-process!!
 #
 #################################################################
 
 import PySimpleGUI as sg 
 from tkinter import font as tkfont
+from tkinter import END as tkend
 from datetime import datetime
+import sys
 
 # `application_active` flag used when updating the window after the first read, and after a theme change
 # this is currently used as a work-around for the `finalize=True` bug, and can be
 # removed when that issue is fixed
 application_active = False 
 
+
+##-----CREATE CUSTOM RE-DIRECT STDOUT OBJECT-------------##
+
+
+class RedirectText:
+    def __init__(self, window):
+        ''' constructor '''
+        self.window = window
+        self.saveout = sys.stdout
+
+    def write(self, string):
+        self.window['_OUT_'].Widget.insert(tkend, string)
+
+    def flush(self):
+        sys.stdout = self.saveout 
+        sys.stdout.flush()
+
 ##-----SETUP DEFAULT USER SETTINGS-----------------------##
+
+
 save_user_settings = False
 # if flag is `False` the settings are saved in active session only with a `dict`
 # if flag is `True` the settings are saved in a local directory in a shelve file
@@ -42,13 +63,21 @@ if len(settings.keys()) == 0:
 # default theme or user saved theme
 sg.change_look_and_feel(settings['theme'])
 
+# string to output initial start settings
+outstring = "STARTUP SETTINGS:\n"+"-"*40+"\nTheme"+"."*10+" {}\nTab size"+"."*7+" {}\nFont"+"."*11+" {} {}\nOpen file"+"."*6+" {}\n"
+settings.update(out = outstring.format(settings['theme'], settings['tabsize'], settings['font'][0], settings['font'][1], settings['filename']))
+
+
 def close_settings():
     ''' Close the the shelve file upon exit '''
-    settings.update(filename=None, body='', info='> New File <')
+    settings.update(filename=None, body='', out='', info='> New File <')
     if save_user_settings:
         settings.close()
 
+
 ##----SETUP GUI WINDOW-----------------------------------##
+
+
 def main_window(settings):
     ''' Create the main window; also called when the application theme is changed '''
     elem_width= 80 # adjust default width
@@ -59,8 +88,8 @@ def main_window(settings):
         ['Run',['Run Module']],
         ['Help',['View Help','---','About Izzypad 1.0']]]
 
-    col1 = sg.Column([[sg.Multiline(default_text=settings['body'], font=settings['font'], key='_BODY_', auto_size_text=True, size=(elem_width,20))]])
-    col2 = sg.Column([[sg.Output(size=(elem_width,8), font=settings['font'], key='_OUT_')]])               
+    col1 = sg.Column([[sg.Multiline(default_text=settings['body'], font=settings['font'], key='_BODY_', size=(elem_width,20))]])
+    col2 = sg.Column([[sg.Multiline(default_text=settings['out'], font=settings['font'], key='_OUT_', autoscroll=True, size=(elem_width,8))]])         
 
     window_layout = [
         [sg.Menu(menu_layout)],
@@ -70,7 +99,9 @@ def main_window(settings):
     window = sg.Window('Text-Code Editor', window_layout, resizable=True, margins=(0,0), return_keyboard_events=True)
     return window
 
+
 ##----FILE MENU FUNCTIONS--------------------------------##
+
 
 def new_file(window): # CTRL+N shortcut key
     ''' Setup a new session by clearing application variables and the body '''
@@ -114,7 +145,9 @@ def save_file_as(window, values):
         window['_INFO_'](value=filename.replace('/',' > '))
         settings.update(filename=filename, info=filename.replace('/',' > '))
 
+
 ##----EDIT MENU FUNCTIONS--------------------------------##
+
 
 def undo(): # CTRL+Z shortcut key
     pass
@@ -147,13 +180,17 @@ def fetch_datetime(window, values):
     window['_BODY_'].update(value=new_body)    
     settings.update(body=new_body)    
 
+
 ##----FORMAT MENU FUNCTIONS------------------------------##
+
 
 def change_theme(window, event, values):
     ''' Change the color theme of the application window. This will destroy the active window and 
-        recreate it with the same values. The output element is reset at this time. I'll fix this
-        in the future '''
-    settings.update(theme=event, body=values['_BODY_'])
+        recreate it with the same values.'''
+    #old_theme = settings['theme']
+    #if not old_theme == event:
+    #    print(f"Theme.......... {old_theme} => {event}\n")
+    settings.update(theme=event, body=values['_BODY_'], out=values['_OUT_'])
     sg.change_look_and_feel(event)
     window.close()
 
@@ -181,6 +218,7 @@ def change_font(window):
         if font_selection != settings['font']:
             settings.update(font=font_selection)
             window['_BODY_'].update(font=font_selection)
+            window['_OUT_'].update(font=font_selection)
             print(f"Font........... {(font_name, font_size)} => {font_selection}\n")
     font_window.close()
 
@@ -213,7 +251,9 @@ def show_settings():
     print( "Font.............. {}, {}".format(*settings['font']))
     print(f"Open file...... {settings['filename']}\n")
 
+
 ##----RUN MENU FUNCTIONS---------------------------------##
+
 
 def run_module(values): # F5 shortcut key
     ''' Run any python code that is in the body '''
@@ -225,9 +265,13 @@ def run_module(values): # F5 shortcut key
         print('ERROR!......... Invalid Python Code')
     print('.'*50)
 
+
 ##----MAIN EVENT LOOP------------------------------------##
 
+
 window = main_window(settings)
+redir = RedirectText(window)
+sys.stdout = redir
 
 while True:
     event, values = window.read(timeout=1)
@@ -235,7 +279,6 @@ while True:
     # adjust window when application is activated
     if not application_active:
         application_active = True
-        show_settings()
         set_tabsize(window)
    
     # listen for window events
@@ -260,7 +303,13 @@ while True:
         show_settings()
     if event in ('Run Module', 'F5:116' ):
         run_module(values)
-    if event in settings['themes']:
+    if event in settings['themes']: 
+        ###############################>>> refactor this bit into a function
+        # set application to inactive
         application_active = False
         change_theme(window, event, values)
+        # recreate window and redirect object
+        sys.stdout = redir.saveout
         window = main_window(settings)
+        redir = RedirectText(window)
+        sys.stdout = redir
