@@ -1,7 +1,6 @@
 import PySimpleGUI as sg 
 from tkinter import font as tkfont
 from datetime import datetime
-import shelve
 
 ##-----SETUP DEFAULT USER SETTINGS-----------------------##
 
@@ -9,15 +8,16 @@ save_user_settings = False
 application_active = False
 
 if save_user_settings:
+    import shelve
     settings = shelve.open('app_settings')
 else:
     settings = {}
 
 # test for existing shelf and create if not exist
 if len(settings.keys())==0:
-    settings['theme'] = 'Reddit'
+    settings['theme'] = 'BluePurple'
     settings['themes'] = sg.list_of_look_and_feel_values()
-    settings['font']=('Consolas', 12)
+    settings['font']=('TkDefaultFont', 12)
     settings['tabsize']=4
     settings['filename'] = None
     settings['body'] = ''
@@ -34,6 +34,7 @@ def close_settings():
 
 ##----SETUP GUI WINDOW-----------------------------------##
 def main_window(settings):
+    elem_width= 80 # adjust default width
     menu_layout = [
         ['File',['New','Open','Save','Save As','---','Exit']],
         ['Edit',['Undo','---','Cut','Copy','Paste','Delete','---','Find...','Replace...','---','Select All','Date/Time']],
@@ -41,15 +42,15 @@ def main_window(settings):
         ['Run',['Run Module']],
         ['Help',['View Help','---','About Izzypad 1.0']]]
 
-    col1 = sg.Column([[sg.Multiline(default_text=settings['body'], font=settings['font'], key='_BODY_', auto_size_text=True, size=(150,20))]])
-    col2 = sg.Column([[sg.Output(size=(150,8), font=('Consolas', 10), key='_OUT_')]])               
+    col1 = sg.Column([[sg.Multiline(default_text=settings['body'], font=settings['font'], key='_BODY_', auto_size_text=True, size=(elem_width,20))]])
+    col2 = sg.Column([[sg.Output(size=(elem_width,8), font=settings['font'], key='_OUT_')]])               
 
     window_layout = [
         [sg.Menu(menu_layout)],
-        [sg.Text(settings['info'], key='_INFO_', font=('Consolas',11), size=(100,1))],
+        [sg.Text(settings['info'], key='_INFO_', font=('Consolas',11), size=(elem_width,1))],
         [sg.Pane([col1, col2])]]
 
-    window = sg.Window('Text-Code Editor', window_layout, resizable=True, margins=(0,0), size=(1000,600), return_keyboard_events=True)
+    window = sg.Window('Text-Code Editor', window_layout, resizable=True, margins=(0,0), return_keyboard_events=True)
     return window
 
 ##----FILE MENU FUNCTIONS--------------------------------##
@@ -168,7 +169,7 @@ def change_tabsize(window):
 
 def set_tabsize(window, size=4): # load upon opening after 'finalize=True' is fixed
     ''' adjust the tab size in the body; default is 4 '''
-    font = tkfont.Font(font=settings.get('font')[0])
+    font = tkfont.Font(font=settings.get('font'))
     tab_width = font.measure(' '*size)
     window['_BODY_'].Widget.configure(tabs=(tab_width,)) 
     settings.update(tabsize=size) 
@@ -176,7 +177,7 @@ def set_tabsize(window, size=4): # load upon opening after 'finalize=True' is fi
 def show_settings():
     print(f"Theme.......... {settings['theme']}")
     print(f"Tab size....... {settings['tabsize']}")
-    print( "Font........... {}, {}".format(*settings['font']))
+    print( "Font.............. {}, {}".format(*settings['font']))
     print(f"Open file...... {settings['filename']}\n")
 
 ##----RUN MENU FUNCTIONS---------------------------------##
