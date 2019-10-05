@@ -1,13 +1,9 @@
-#################################################################
-#
-#  CODE-TEXT EDITOR
-#
-#  What?  A simple code and text editor made with PySimpleGUI
-#  Who?   israel.dryer@gmail.com
-#  When?  10/5/2019 (last modified)
-#  Also?  this is very much a work-in-process!!
-#
-#################################################################
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#  CODE-TEXT-EDITOR
+#  israel.dryer@gmail.com
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+VERSION = '0.1.075'
+VERSION_DATE = '2019-10-05'
 
 import PySimpleGUI as sg 
 from tkinter import font as tkfont
@@ -23,7 +19,6 @@ application_active = False
 
 ##-----CREATE CUSTOM RE-DIRECT STDOUT OBJECT-------------##
 
-
 class RedirectText:
     def __init__(self, window):
         ''' constructor '''
@@ -38,7 +33,6 @@ class RedirectText:
         sys.stdout.flush()
 
 ##-----SETUP DEFAULT USER SETTINGS-----------------------##
-
 
 save_user_settings = False
 # if flag is `False` the settings are saved in active session only with a `dict`
@@ -77,7 +71,6 @@ def close_settings():
 
 ##----SETUP GUI WINDOW-----------------------------------##
 
-
 def main_window(settings):
     ''' Create the main window; also called when the application theme is changed '''
     elem_width= 80 # adjust default width
@@ -86,7 +79,7 @@ def main_window(settings):
         ['Edit',['Undo','---','Cut','Copy','Paste','Delete','---','Find...','Replace...','---','Select All','Date/Time']],
         ['Format',['Theme', settings['themes'],'Font','Tab Size','Show Settings']],
         ['Run',['Run Module']],
-        ['Help',['View Help','---','About Izzypad 1.0']]]
+        ['Help',['View Help','---','About Me']]]
 
     col1 = sg.Column([[sg.Multiline(default_text=settings['body'], font=settings['font'], key='_BODY_', size=(elem_width,20))]])
     col2 = sg.Column([[sg.Multiline(default_text=settings['out'], font=settings['font'], key='_OUT_', autoscroll=True, size=(elem_width,8))]])         
@@ -101,7 +94,6 @@ def main_window(settings):
 
 
 ##----FILE MENU FUNCTIONS--------------------------------##
-
 
 def new_file(window): # CTRL+N shortcut key
     ''' Setup a new session by clearing application variables and the body '''
@@ -148,7 +140,6 @@ def save_file_as(window, values):
 
 ##----EDIT MENU FUNCTIONS--------------------------------##
 
-
 def undo(): # CTRL+Z shortcut key
     pass
 
@@ -182,7 +173,6 @@ def fetch_datetime(window, values):
 
 
 ##----FORMAT MENU FUNCTIONS------------------------------##
-
 
 def change_theme(window, event, values):
     ''' Change the color theme of the application window. This will destroy the active window and 
@@ -254,7 +244,6 @@ def show_settings():
 
 ##----RUN MENU FUNCTIONS---------------------------------##
 
-
 def run_module(values): # F5 shortcut key
     ''' Run any python code that is in the body '''
     print('.'*50)
@@ -266,8 +255,37 @@ def run_module(values): # F5 shortcut key
     print('.'*50)
 
 
-##----MAIN EVENT LOOP------------------------------------##
+##----HELP MENU FUNCTIONS--------------------------------##
 
+def get_help():
+    msg = '''
+    “Never let your ego get in the way of asking for help 
+    when in desperate need. We have all been helped at a 
+    point in our lives.” ― Edmond Mbiaka
+    
+    israel.dryer@gmail.com
+    '''
+    sg.Popup(msg)
+
+def about_me():
+    msg = '''
+    TextCodeEditor is a PySimpleGUI based text and code 
+    editor that is being developed as a hobby project.
+    It is very much a work in progress. So, if you'd 
+    like to contribute to the development, then be my
+    guest! 
+    
+    You can send any feedback to: israel.dryer@gmail.com. 
+    
+    And check the GitHub repository on GitHub/israel-dryer/
+
+    Version.......{}
+    Date..... {}
+    '''.format(VERSION, VERSION_DATE)
+    sg.popup(msg)
+
+
+##----MAIN EVENT LOOP------------------------------------##
 
 window = main_window(settings)
 redir = RedirectText(window)
@@ -313,3 +331,7 @@ while True:
         window = main_window(settings)
         redir = RedirectText(window)
         sys.stdout = redir
+    if event in ('View Help',):
+        get_help()
+    if event in ('About Me',):
+        about_me()
