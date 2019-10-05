@@ -61,7 +61,10 @@ def new_file(window): # CTRL+N shortcut key
     settings.update(filename=None, body='', info='> New File <')
 
 def open_file(window): # CTRL+O shortcut key
-    filename = sg.popup_get_file('File Name:', title='Open', no_window=True)
+    try: # 'OUT OF INDEX' error in trinket if 'CANCEL' button is pressed
+        filename = sg.popup_get_file('File Name:', title='Open', no_window=True)
+    except:
+        return
     if filename not in (None,''):
         with open(filename,'r') as f:
             file_text = f.read()
@@ -80,7 +83,10 @@ def save_file(window, values): # CTRL+S shortcut key
         save_file_as(window, values)
 
 def save_file_as(window, values):
-    filename = sg.popup_get_file('Save File', save_as=True, no_window=True)
+    try: # 'OUT OF INDEX' error in Trinket if 'CANCEL' button is clicked
+        filename = sg.popup_get_file('Save File', save_as=True, no_window=True)
+    except:
+        return
     if filename not in (None,''):
         with open(filename,'w') as f:
             f.write(values['_BODY_'])
@@ -192,6 +198,7 @@ def run_module(values): # F5 shortcut key
     print('.'*50)
 
 ##----MAIN EVENT LOOP------------------------------------##
+
 window = main_window(settings)
 
 while True:
