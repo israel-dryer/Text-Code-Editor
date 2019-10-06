@@ -2,7 +2,7 @@
 #  CODE-TEXT-EDITOR
 #  israel.dryer@gmail.com
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-VERSION = '0.1.076'
+VERSION = '0.1.077'
 VERSION_DATE = '2019-10-05'
 
 import PySimpleGUI as sg 
@@ -60,7 +60,6 @@ sg.change_look_and_feel(settings['theme'])
 # string to output initial start settings
 outstring = "STARTUP SETTINGS:\n"+"-"*40+"\nTheme"+"."*10+" {}\nTab size"+"."*7+" {}\nFont"+"."*11+" {} {}\nOpen file"+"."*6+" {}\n\n"
 settings.update(out = outstring.format(settings['theme'], settings['tabsize'], settings['font'][0], settings['font'][1], settings['filename']))
-
 
 def close_settings():
     ''' Close the the shelve file upon exit '''
@@ -152,9 +151,13 @@ def copy(): # CTRL+C shortcut key
 def paste(window, values): # CTRL+V shortcut key
     ''' append contents of clipboard to body'''
     # optimize this in future to insert into current cursor position
-    new = window.TKroot.clipboard_get()
-    old = values['_BODY_']
-    window['_BODY_'].update(value=new + old)
+    try:
+        new = window.TKroot.clipboard_get()
+    except:
+        return
+    else:
+        old = values['_BODY_']
+        window['_BODY_'].update(value=new + old)
 
 def delete():
     pass
