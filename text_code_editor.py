@@ -2,7 +2,7 @@
 #  CODE-TEXT-EDITOR
 #  israel.dryer@gmail.com
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-VERSION = '0.1.075'
+VERSION = '0.1.076'
 VERSION_DATE = '2019-10-05'
 
 import PySimpleGUI as sg 
@@ -149,8 +149,12 @@ def cut(): # CTRL+X shortcut key
 def copy(): # CTRL+C shortcut key
     pass
 
-def paste(): # CTRL+V shortcut key
-    pass
+def paste(window, values): # CTRL+V shortcut key
+    ''' append contents of clipboard to body'''
+    # optimize this in future to insert into current cursor position
+    new = window.TKroot.clipboard_get()
+    old = values['_BODY_']
+    window['_BODY_'].update(value=new + old)
 
 def delete():
     pass
@@ -335,3 +339,5 @@ while True:
         get_help()
     if event in ('About Me',):
         about_me()
+    if event in ('Paste',):
+        paste(window, values)
