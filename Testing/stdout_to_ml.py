@@ -9,12 +9,14 @@ class RedirectText:
     def __init__(self, window):
         ''' constructor '''
         self.window = window
+        self.saveout = sys.stdout
 
     def write(self, string):
         self.window['OUT'].Widget.insert(tkEND, string)
 
     def flush(self):
-        self.window['OUT'].update(value='')
+        sys.stdout = self.saveout
+        sys.stdout.flush()
 
 # save output
 saveout = sys.stdout
