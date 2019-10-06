@@ -2,12 +2,11 @@
 #  CODE-TEXT-EDITOR
 #  israel.dryer@gmail.com
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-VERSION = '0.1.078'
+VERSION = '0.1.079'
 VERSION_DATE = '2019-10-06'
 
 import PySimpleGUI as sg 
 from tkinter import font as tkfont
-from tkinter import INSERT, END
 from datetime import datetime
 import sys
 
@@ -26,7 +25,7 @@ class RedirectText:
         self.saveout = sys.stdout
 
     def write(self, string):
-        self.window['_OUT_'].Widget.insert(END, string)
+        self.window['_OUT_'].Widget.insert("end", string)
 
     def flush(self):
         sys.stdout = self.saveout 
@@ -155,7 +154,7 @@ def paste(window): # CTRL+V shortcut key
     except:
         return
     else:
-        window['_BODY_'].Widget.insert(INSERT, clip)
+        window['_BODY_'].Widget.insert("insert", clip)
 
 def delete():
     pass
@@ -166,7 +165,7 @@ def find(): # CTRL+F shortcut key
 def replace(): # CTRL+H shortcut key
     pass
 
-def select_all(window):
+def select_all(window): # CTRL+A shortcut key
     ''' select all text in the body '''
     window['_BODY_'].Widget.tag_add("sel","1.0","end")
 
