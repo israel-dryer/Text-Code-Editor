@@ -2,12 +2,12 @@
 #  CODE-TEXT-EDITOR
 #  israel.dryer@gmail.com
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-VERSION = '0.1.077'
-VERSION_DATE = '2019-10-05'
+VERSION = '0.1.078'
+VERSION_DATE = '2019-10-06'
 
 import PySimpleGUI as sg 
 from tkinter import font as tkfont
-from tkinter import END as tkend
+from tkinter import INSERT, END
 from datetime import datetime
 import sys
 
@@ -26,7 +26,7 @@ class RedirectText:
         self.saveout = sys.stdout
 
     def write(self, string):
-        self.window['_OUT_'].Widget.insert(tkend, string)
+        self.window['_OUT_'].Widget.insert(END, string)
 
     def flush(self):
         sys.stdout = self.saveout 
@@ -148,16 +148,14 @@ def cut(): # CTRL+X shortcut key
 def copy(): # CTRL+C shortcut key
     pass
 
-def paste(window, values): # CTRL+V shortcut key
-    ''' append contents of clipboard to body'''
-    # optimize this in future to insert into current cursor position
+def paste(window): # CTRL+V shortcut key
+    ''' paste clipboard contents into current cursor position '''
     try:
-        new = window.TKroot.clipboard_get()
+        clip = window.TKroot.clipboard_get()
     except:
         return
     else:
-        old = values['_BODY_']
-        window['_BODY_'].update(value=new + old)
+        window['_BODY_'].Widget.insert(INSERT, clip)
 
 def delete():
     pass
@@ -168,8 +166,9 @@ def find(): # CTRL+F shortcut key
 def replace(): # CTRL+H shortcut key
     pass
 
-def select_all():
-    pass
+def select_all(window):
+    ''' select all text in the body '''
+    window['_BODY_'].Widget.tag_add("sel","1.0","end")
 
 def fetch_datetime(window, values):
     ''' Append the current date and time into the body '''
@@ -343,4 +342,6 @@ while True:
     if event in ('About Me',):
         about_me()
     if event in ('Paste',):
-        paste(window, values)
+        paste(window)
+    if event in ('Select All',):
+        select_all(window)
